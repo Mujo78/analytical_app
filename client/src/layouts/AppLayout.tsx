@@ -1,5 +1,4 @@
-import { MegaMenu } from "primereact/megamenu";
-import React from "react";
+import { Menubar } from "primereact/menubar";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import { Link, Outlet } from "react-router";
 
@@ -119,10 +118,8 @@ const AppLayout = () => {
         </Menu>
       </Sidebar>
       <div className="flex flex-col gap-3 p-4">
-        <MegaMenu
+        <Menubar
           model={items}
-          orientation="horizontal"
-          breakpoint="960px"
           className="p-3 surface-0 shadow-2"
           style={{ borderRadius: "3rem" }}
         />
