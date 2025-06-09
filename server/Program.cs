@@ -1,11 +1,22 @@
 using Microsoft.EntityFrameworkCore;
+using server;
 using server.Data;
+using server.Repository;
+using server.Repository.IRepository;
+using server.Services;
+using server.Services.IServices;
+using StackExchange.Profiling.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<EntityDBContext>(options =>
-    options.UseSqlServer(connString));
+    options.UseSqlServer(connString, sql => sql.CommandTimeout(600)));
 
 var myAllowOrigin = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
@@ -19,7 +30,26 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(10);
+});
+
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+builder.Services.AddMiniProfiler(options =>
+{
+    options.RouteBasePath = "/profiler";
+    options.TrackConnectionOpenClose = true;
+    options.PopupShowTimeWithChildren = true;
+    options.ShouldProfile = _ => true;
+}).AddEntityFramework();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -35,7 +65,8 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty;
     });
 }
-
+app.UseMiniProfiler();
+app.UseMiddleware<ResourceMetricsMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors(myAllowOrigin);
 app.MapControllers();
