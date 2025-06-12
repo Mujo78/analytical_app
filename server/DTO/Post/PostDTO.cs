@@ -15,7 +15,7 @@ public class PostDTO
     public int FavoriteCount { get; set; }
     public DateTime LastActivityDate { get; set; }
     public DateTime LastEditDate { get; set; }
-    public DateTime LastEditorDisplayName { get; set; }
+    public string LastEditorDisplayName { get; set; }
     public int LastEditorUserId { get; set; }
     public int OwnerUserId { get; set; }
     public int ParentId { get; set; }

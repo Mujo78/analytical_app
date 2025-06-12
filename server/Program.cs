@@ -3,6 +3,7 @@ using server;
 using server.Data;
 using server.Repository;
 using server.Repository.IRepository;
+using server.Repository.IRepository.IUser;
 using server.Services;
 using server.Services.IServices;
 using StackExchange.Profiling.Storage;
@@ -35,10 +36,21 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(10);
 });
 
+builder.Services.AddSingleton<DapperContext>();
+
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserEFRepository, UserEFRepository>();
+builder.Services.AddScoped<IUserDapperRepository, UserDapperRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IPostRepository, PostEFRepository>();
+builder.Services.AddScoped<IPostRepository, PostDapperRepository>();
+builder.Services.AddScoped<IPostService, PostService>();
+
+builder.Services.AddScoped<ICommentRepository, CommentEFRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentDapperRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 

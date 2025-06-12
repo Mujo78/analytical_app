@@ -20,4 +20,7 @@ public class User
     public int Views { get; set; }
     public string? WebsiteUrl { get; set; }
     public int? AccountId { get; set; }
+
+    public ICollection<Post> Posts { get; set; }
+    public ICollection<Comment> Comments { get; set; }
 }
