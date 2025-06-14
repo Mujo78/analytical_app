@@ -110,24 +110,24 @@ public class UserDapperRepository(DapperContext dapperContext) : IUserDapperRepo
     public async Task<List<User>> GetUsersForReputationBonusAsync(IDbConnection connection, IDbTransaction transaction)
     {
         var sql = @"
-            WITH UserPostComments AS (
-                SELECT 
-                    u.Id AS UserId,
-                    COUNT(DISTINCT p.Id) AS PostsCount,
-                    COUNT(DISTINCT CASE WHEN EXISTS (SELECT 1 FROM Comments c WHERE c.PostId = p.Id) THEN p.Id END) AS PostsWithCommentsCount,
-                    COUNT(c.Id) AS TotalCommentsCount
-                FROM Users u
-                LEFT JOIN Posts p ON p.OwnerUserId = u.Id
-                LEFT JOIN Comments c ON c.PostId = p.Id
-                GROUP BY u.Id
-            )
-            SELECT u.*
+        WITH UserPostStats AS (
+            SELECT 
+                u.Id AS UserId,
+                COUNT(p.Id) AS PostsCount,
+                COUNT(DISTINCT CASE WHEN c.Id IS NOT NULL THEN p.Id END) AS PostsWithCommentsCount,
+                COUNT(c.Id) AS TotalCommentsCount
             FROM Users u
-            JOIN UserPostComments upc ON upc.UserId = u.Id
-            WHERE upc.PostsCount > 5
-            AND upc.PostsWithCommentsCount >= 3
-            AND upc.TotalCommentsCount > 10;
-        ";
+            LEFT JOIN Posts p ON p.OwnerUserId = u.Id
+            LEFT JOIN Comments c ON c.PostId = p.Id
+            GROUP BY u.Id
+        )
+        SELECT u.*
+        FROM Users u
+        JOIN UserPostStats ups ON ups.UserId = u.Id
+        WHERE ups.PostsCount > 10
+          AND ups.PostsWithCommentsCount >= 10
+          AND ups.TotalCommentsCount > 30;
+    ";
 
         var users = await connection.QueryAsync<User>(sql, transaction: transaction);
 

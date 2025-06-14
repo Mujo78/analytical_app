@@ -72,18 +72,17 @@ public class UserEFRepository(EntityDBContext context) : IUserEFRepository
 
     public async Task<List<User>> GetUsersForReputationBonusAsync()
     {
-        var users = await _context.Users
-            .Include(u => u.Posts)
-            .ThenInclude(p => p.Comments).AsSplitQuery()
-        .Where(u => u.Posts.Count > 5)
-        .ToListAsync();
-
-        var eligibleUsers = users
-            .Where(u =>
-                u.Posts.Count(p => p.Comments.Any()) >= 3 &&
-                u.Posts.SelectMany(p => p.Comments).Count() > 10
-            )
-            .ToList();
+        var eligibleUsers = await _context.Users
+            .Where(u => u.Posts.Count() > 10)
+            .Select(u => new
+            {
+                User = u,
+                PostsWithComments = u.Posts.Count(p => p.Comments.Any()),
+                TotalComments = u.Posts.SelectMany(p => p.Comments).Count()
+            })
+            .Where(x => x.PostsWithComments >= 10 && x.TotalComments > 30)
+            .Select(x => x.User)
+            .ToListAsync();
 
         return eligibleUsers;
     }

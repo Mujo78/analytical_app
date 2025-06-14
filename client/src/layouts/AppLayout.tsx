@@ -1,133 +1,46 @@
-import { Menubar } from "primereact/menubar";
-import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
-import { Link, Outlet } from "react-router";
+import { Stack } from "@mui/material";
+import { Outlet } from "react-router";
+import { ReactRouterAppProvider } from "@toolpad/core/react-router";
+import { type Branding, type Navigation } from "@toolpad/core/AppProvider";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import Timeline from "@mui/icons-material/Timeline";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
+import { DashboardLayout, PageContainer } from "@toolpad/core";
 
 const AppLayout = () => {
-  const items = [
+  const navigation: Navigation = [
     {
-      label: "Company",
-      root: true,
-
-      items: [
-        [
-          {
-            items: [
-              {
-                label: "Features",
-                icon: "pi pi-list",
-                subtext: "Subtext of item",
-              },
-              {
-                label: "Customers",
-                icon: "pi pi-users",
-                subtext: "Subtext of item",
-              },
-              {
-                label: "Case Studies",
-                icon: "pi pi-file",
-                subtext: "Subtext of item",
-              },
-            ],
-          },
-        ],
-        [
-          {
-            items: [
-              {
-                label: "Solutions",
-                icon: "pi pi-shield",
-                subtext: "Subtext of item",
-              },
-              {
-                label: "Faq",
-                icon: "pi pi-question",
-                subtext: "Subtext of item",
-              },
-              {
-                label: "Library",
-                icon: "pi pi-search",
-                subtext: "Subtext of item",
-              },
-            ],
-          },
-        ],
-        [
-          {
-            items: [
-              {
-                label: "Community",
-                icon: "pi pi-comments",
-                subtext: "Subtext of item",
-              },
-              {
-                label: "Rewards",
-                icon: "pi pi-star",
-                subtext: "Subtext of item",
-              },
-              {
-                label: "Investors",
-                icon: "pi pi-globe",
-                subtext: "Subtext of item",
-              },
-            ],
-          },
-        ],
-        [
-          {
-            items: [
-              {
-                image:
-                  "https://primefaces.org/cdn/primereact/images/uikit/uikit-system.png",
-                label: "GET STARTED",
-                subtext: "Build spectacular apps in no time.",
-              },
-            ],
-          },
-        ],
-      ],
+      kind: "header",
+      title: "Main items",
     },
     {
-      label: "Resources",
-      root: true,
+      segment: "entity-core",
+      title: "Entity Framework",
+      icon: <DashboardIcon />,
     },
     {
-      label: "Contact",
-      root: true,
+      segment: "dapper",
+      title: "Dapper",
+      icon: <Timeline />,
     },
   ];
 
+  const branding: Branding = {
+    logo: <QueryStatsIcon sx={{ height: 60, width: 35 }} />,
+    homeUrl: "/",
+    title: "Query App",
+  };
+
   return (
-    <div className="min-h-screen w-full flex bg-gray-100">
-      <Sidebar className="min-h-full">
-        <Menu
-          menuItemStyles={{
-            button: {
-              [`&.active`]: {
-                backgroundColor: "#13395e",
-                color: "#b6c8d9",
-              },
-            },
-          }}
-        >
-          <MenuItem component={<Link to="/" />}> Dashboard</MenuItem>
-          <MenuItem component={<Link to="/entity-core" />}>
-            {" "}
-            Entity Core
-          </MenuItem>
-          <MenuItem component={<Link to="/dapper" />}> Dapper</MenuItem>
-        </Menu>
-      </Sidebar>
-      <div className="flex flex-col gap-3 p-4">
-        <Menubar
-          model={items}
-          className="p-3 surface-0 shadow-2"
-          style={{ borderRadius: "3rem" }}
-        />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+    <Stack sx={{ maxWidth: "100%", minHeight: "100vh" }}>
+      <ReactRouterAppProvider navigation={navigation}>
+        <DashboardLayout disableCollapsibleSidebar branding={branding}>
+          <PageContainer>
+            <Outlet />
+          </PageContainer>
+        </DashboardLayout>
+      </ReactRouterAppProvider>
+    </Stack>
   );
 };
 

@@ -18,7 +18,7 @@ namespace server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> GetUsers([FromQuery] bool useDapper)
+        public async Task<ActionResult> GetUsers([FromQuery] bool useDapper = false)
         {
             var users = await userService.GetTopReputationUsersAsync(useDapper);
             return Ok(users);
@@ -32,7 +32,7 @@ namespace server.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> GetUserAnalytics(int id, [FromQuery] bool useDapper)
+        public async Task<ActionResult> GetUserAnalytics(int id, [FromQuery] bool useDapper = false)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace server.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> CreateUser([FromBody] CreateUserDTO user, [FromQuery] bool useDapper)
+        public async Task<ActionResult> CreateUser([FromBody] CreateUserDTO user, [FromQuery] bool useDapper = false)
         {
             if (user == null || !ModelState.IsValid)
             {
@@ -80,7 +80,7 @@ namespace server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> UpdateUser([FromBody] UpdateUserDTO userUpdateDTO, int userId, [FromQuery] bool useDapper)
+        public async Task<ActionResult> UpdateUser([FromBody] UpdateUserDTO userUpdateDTO, int userId, [FromQuery] bool useDapper = false)
         {
             if (userUpdateDTO == null || !ModelState.IsValid)
             {
@@ -105,7 +105,7 @@ namespace server.Controllers
         /// Complex UPDATE query to modify user reputation points.
         /// </summary>
         [HttpPut("distribute-bonus")]
-        public async Task<IActionResult> DistributeReputationBonus([FromQuery] bool useDapper)
+        public async Task<IActionResult> DistributeReputationBonus([FromQuery] bool useDapper = false)
         {
             if (useDapper)
             {

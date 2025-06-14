@@ -62,7 +62,6 @@ public class UserService(IUserEFRepository userEFRepository, IUserDapperReposito
     {
         var transaction = await _context.Database.BeginTransactionAsync();
         var users = await _userEFRepository.GetUsersForReputationBonusAsync() ?? throw new Exception("No users found for reputation bonus distribution.");
-        Console.WriteLine(users.Count);
         try
         {
 
@@ -177,6 +176,7 @@ public class UserService(IUserEFRepository userEFRepository, IUserDapperReposito
     public async Task DistributeBonusReputationWithDapperAsync()
     {
         using var connection = _dapperContext.CreateConnection();
+        connection.Open();
         using var transaction = connection.BeginTransaction();
 
 
@@ -184,15 +184,14 @@ public class UserService(IUserEFRepository userEFRepository, IUserDapperReposito
         {
 
             var users = await _userDapperRepository.GetUsersForReputationBonusAsync(connection, transaction) ?? throw new Exception("No users found for reputation bonus distribution.");
-
             await _userDapperRepository.UpdateUsersReputationAsync(users, connection, transaction);
 
             transaction.Commit();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             transaction.Rollback();
-            throw new Exception("An error occurred while distributing bonus reputation. Please try again later.");
+            throw new Exception("An error occurred while distributing bonus reputation. Please try again later. " + ex.Message);
         }
     }
 

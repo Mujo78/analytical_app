@@ -1,13 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using server.Data;
-using server.DTO.Post;
 using server.Models;
-using server.Repository.IRepository;
-using Dapper;
+using server.Repository.IRepository.IPost;
 
 namespace server.Repository;
 
-public class PostEFRepository(EntityDBContext context) : IPostRepository
+public class PostEFRepository(EntityDBContext context) : IPostEFRepository
 {
     private readonly EntityDBContext _context = context;
     /// <summary>

@@ -14,9 +14,9 @@ namespace server.Controllers
         /// Retrieves comments by postID - comments for posts - latest 10.
         /// /// </summary>
         [HttpGet("post/{postId}")]
-        public async Task<IActionResult> GetCommentsByPostIdAsync(int postId)
+        public async Task<IActionResult> GetCommentsByPostIdAsync(int postId, [FromQuery] bool useDapper = false)
         {
-            var comments = await _commentService.GetCommentsByPostIdAsync(postId);
+            var comments = await _commentService.GetCommentsByPostIdAsync(postId, useDapper);
             if (comments == null || comments.Count == 0)
             {
                 return NotFound("No comments found for this post.");
@@ -26,12 +26,21 @@ namespace server.Controllers
 
         /// <summary>
         /// Deletes a comment by postId and commentId.
-        /// This will use Entity Framework to delete the comment.
         /// </summary>
         [HttpDelete("{postId}/delete/{commentId}")]
-        public async Task<IActionResult> DeleteComment(int postId, int commentId)
+        public async Task<IActionResult> DeleteComment(int postId, int commentId, [FromQuery] bool useDapper = false)
         {
-            var commentToDeleteId = await _commentService.DeleteCommentAsync(commentId, postId);
+            int commentToDeleteId;
+
+            if (useDapper)
+            {
+                commentToDeleteId = await _commentService.DeleteCommentWithDapperAsync(commentId, postId);
+            }
+            else
+            {
+                commentToDeleteId = await _commentService.DeleteCommentAsync(commentId, postId);
+            }
+
             return Ok(commentToDeleteId);
         }
     }

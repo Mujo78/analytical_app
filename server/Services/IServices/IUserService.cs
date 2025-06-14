@@ -4,7 +4,6 @@ namespace server.Services.IServices;
 
 public interface IUserService
 {
-    // Service Methods that use Entity Framework Core
     Task<List<UserDTO>> GetTopReputationUsersAsync(bool useDapper = false);
     Task<UserAnalyticDTO> GetUsersAnalyticsAsync(int userId, bool useDapper = false);
     Task CreateUserAsync(CreateUserDTO user, bool useDapper = false);

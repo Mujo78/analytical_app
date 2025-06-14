@@ -1,14 +1,12 @@
-using System;
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTO.Comment;
 using server.Models;
-using server.Repository.IRepository;
+using server.Repository.IRepository.IComment;
 
 namespace server.Repository;
 
-public class CommentEFRepository(EntityDBContext context) : ICommentRepository
+public class CommentEFRepository(EntityDBContext context) : ICommentEFRepository
 {
     private readonly EntityDBContext _context = context;
 

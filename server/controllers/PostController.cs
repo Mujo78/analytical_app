@@ -13,13 +13,12 @@ namespace server.Controllers
 
         /// <summary>
         /// Creates a new post.
-        /// Entity Framework Core is used to insert the post into the database.
         /// Complex INSERT query to add a new post.
         /// </summary>
         [HttpPost("/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> CreatePost([FromBody] CreateDTO post, int userId)
+        public async Task<ActionResult> CreatePost([FromBody] CreateDTO post, int userId, [FromQuery] bool useDapper = false)
         {
             if (post == null || !ModelState.IsValid)
             {
@@ -28,7 +27,7 @@ namespace server.Controllers
 
             try
             {
-                await postService.CreatePostAsync(post, userId);
+                await postService.CreatePostAsync(post, userId, useDapper);
                 return Ok("Post created successfully.");
             }
             catch (Exception ex)
@@ -39,12 +38,11 @@ namespace server.Controllers
 
         /// <summary>
         /// Delete a post by postId.
-        /// This will use Entity Framework to delete the post.
         /// </summary>
         [HttpDelete("{postId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeletePost(int postId, int userId)
+        public async Task<IActionResult> DeletePost(int postId, int userId, [FromQuery] bool useDapper = false)
         {
             if (postId <= 0)
             {
@@ -53,7 +51,15 @@ namespace server.Controllers
 
             try
             {
-                var deletedPostId = await postService.DeletePostAsync(postId, userId);
+                int deletedPostId;
+                if (useDapper)
+                {
+                    deletedPostId = await postService.DeletePostWithDapperAsync(postId, userId);
+                }
+                else
+                {
+                    deletedPostId = await postService.DeletePostAsync(postId, userId);
+                }
                 return Ok(deletedPostId);
             }
             catch (Exception ex)

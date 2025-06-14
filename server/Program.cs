@@ -3,10 +3,11 @@ using server;
 using server.Data;
 using server.Repository;
 using server.Repository.IRepository;
+using server.Repository.IRepository.IComment;
+using server.Repository.IRepository.IPost;
 using server.Repository.IRepository.IUser;
 using server.Services;
 using server.Services.IServices;
-using StackExchange.Profiling.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,12 +45,12 @@ builder.Services.AddScoped<IUserEFRepository, UserEFRepository>();
 builder.Services.AddScoped<IUserDapperRepository, UserDapperRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.AddScoped<IPostRepository, PostEFRepository>();
-builder.Services.AddScoped<IPostRepository, PostDapperRepository>();
+builder.Services.AddScoped<IPostEFRepository, PostEFRepository>();
+builder.Services.AddScoped<IPostDapperRepository, PostDapperRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
 
-builder.Services.AddScoped<ICommentRepository, CommentEFRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentDapperRepository>();
+builder.Services.AddScoped<ICommentEFRepository, CommentEFRepository>();
+builder.Services.AddScoped<ICommentDapperRepository, CommentDapperRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
@@ -58,6 +59,7 @@ builder.Services.AddMiniProfiler(options =>
 {
     options.RouteBasePath = "/profiler";
     options.TrackConnectionOpenClose = true;
+    options.EnableServerTimingHeader = true;
     options.PopupShowTimeWithChildren = true;
     options.ShouldProfile = _ => true;
 }).AddEntityFramework();

@@ -1,19 +1,19 @@
-using System;
-using Microsoft.EntityFrameworkCore;
 using server.Data;
 using server.DTO.Post;
 using server.Models;
-using server.Repository.IRepository;
+using server.Repository.IRepository.IPost;
 using server.Services.IServices;
 
 namespace server.Services;
 
-public class PostService(IPostRepository repository, EntityDBContext dbContext) : IPostService
+public class PostService(IPostEFRepository postEFRepository, IPostDapperRepository postDapperRepository, EntityDBContext dbContext, DapperContext dapperContext) : IPostService
 {
-    private readonly IPostRepository _repository = repository;
+    private readonly IPostEFRepository postEFRepository = postEFRepository;
+    private readonly IPostDapperRepository postDapperRepository = postDapperRepository;
     private readonly EntityDBContext _dbContext = dbContext;
+    private readonly DapperContext dapperContext = dapperContext;
 
-    public async Task CreatePostAsync(CreateDTO post, int userId)
+    public async Task CreatePostAsync(CreateDTO post, int userId, bool useDapper = false)
     {
         if (post == null)
         {
@@ -40,11 +40,18 @@ public class PostService(IPostRepository repository, EntityDBContext dbContext) 
 
         try
         {
-            await _repository.CreatePostAsync(postToCreate, userId);
+            if (useDapper)
+            {
+                await postDapperRepository.CreatePostAsync(postToCreate, userId);
+            }
+            else
+            {
+                await postEFRepository.CreatePostAsync(postToCreate, userId);
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw new Exception("An error occurred while creating the user. Please try again later.");
+            throw new Exception("An error occurred while creating the user. Please try again later. " + ex.Message);
         }
     }
 
@@ -55,7 +62,7 @@ public class PostService(IPostRepository repository, EntityDBContext dbContext) 
             throw new ArgumentException("Post ID must be greater than zero.", nameof(postId));
         }
 
-        var post = await _repository.GetPostByIdAsync(postId) ?? throw new ArgumentException("Post not found.", nameof(postId)); ;
+        var post = await postEFRepository.GetPostByIdAsync(postId) ?? throw new ArgumentException("Post not found.", nameof(postId)); ;
         if (post.OwnerUserId != userId)
         {
             throw new UnauthorizedAccessException("You do not have permission to delete this post.");
@@ -65,8 +72,8 @@ public class PostService(IPostRepository repository, EntityDBContext dbContext) 
 
         try
         {
-            await _repository.DeleteAllCommentsByPostIdAsync(post.Id);
-            await _repository.DeletePostAsync(post);
+            await postEFRepository.DeleteAllCommentsByPostIdAsync(post.Id);
+            await postEFRepository.DeletePostAsync(post);
             await transaction.CommitAsync();
             return post.Id;
         }
@@ -74,6 +81,40 @@ public class PostService(IPostRepository repository, EntityDBContext dbContext) 
         {
             await transaction.RollbackAsync();
             throw new Exception("Something went wrong while deleting the post.", ex);
+        }
+    }
+
+    /// <summary>
+    ///  Dapper Implementation
+    /// </summary>
+    public async Task<int> DeletePostWithDapperAsync(int postId, int userId)
+    {
+        if (postId <= 0)
+        {
+            throw new ArgumentException("Post ID must be greater than zero.", nameof(postId));
+        }
+
+        using var connection = dapperContext.CreateConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+
+        try
+        {
+            var post = await postDapperRepository.GetPostByIdAsync(postId, connection, transaction) ?? throw new ArgumentException("Post not found.", nameof(postId));
+            if (post.OwnerUserId != userId)
+            {
+                throw new UnauthorizedAccessException("You do not have permission to delete this post.");
+            }
+            await postDapperRepository.DeleteAllCommentsByPostIdAsync(post.Id, connection, transaction);
+            await postDapperRepository.DeletePostAsync(post, connection, transaction);
+            transaction.Commit();
+            return post.Id;
+        }
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            throw new Exception("Something went wrong while deleting the post. " + ex.Message);
         }
     }
 }

@@ -4,10 +4,11 @@ using server.Models;
 using server.Repository.IRepository;
 using Dapper;
 using server.DTO.Comment;
+using server.Repository.IRepository.IComment;
 
 namespace server.Repository;
 
-public class CommentDapperRepository(DapperContext dapperContext) : ICommentRepository
+public class CommentDapperRepository(DapperContext dapperContext) : ICommentDapperRepository
 {
     private readonly DapperContext _dapperContext = dapperContext;
     /// <summary>
@@ -27,12 +28,13 @@ public class CommentDapperRepository(DapperContext dapperContext) : ICommentRepo
         ";
 
         using var connection = _dapperContext.CreateConnection();
+        connection.Open();
         using var transaction = connection.BeginTransaction();
 
         try
         {
             await connection.ExecuteAsync(sqlUpdatePost, new { PostId = comment.PostId }, transaction);
-            await connection.ExecuteAsync(sqlDeleteComment, new { Id = comment.Id }, transaction);
+            await connection.ExecuteAsync(sqlDeleteComment, new { CommentId = comment.Id }, transaction);
 
             transaction.Commit();
         }
