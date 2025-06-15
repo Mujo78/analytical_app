@@ -1,20 +1,18 @@
-import { Box, Button, Modal, Stack } from "@mui/material";
+import { Box, Modal, Skeleton, Stack } from "@mui/material";
 import { Outlet } from "react-router";
 import { ReactRouterAppProvider } from "@toolpad/core/react-router";
 import { type Branding, type Navigation } from "@toolpad/core/AppProvider";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import Timeline from "@mui/icons-material/Timeline";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
-import {
-  DashboardLayout,
-  PageContainer,
-  type SidebarFooterProps,
-} from "@toolpad/core";
+import { DashboardLayout, PageContainer } from "@toolpad/core";
 import { ToastContainer } from "react-toastify";
 import useProfilerResult from "../hooks/useProfilerResult";
 import { useEffect, useRef, useState } from "react";
 import { apiClient } from "../utils/api";
 import { MiniProfilerTable } from "../components/ui/MiniProfilerTable";
+import SidebarFooter from "../components/ui/SidebarFooter";
+import useRequestState from "../hooks/useRequestState";
 
 const navigation: Navigation = [
   {
@@ -38,15 +36,16 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 800,
+  width: 1000,
   bgcolor: "background.paper",
   borderRadius: "12px",
   boxShadow: 24,
-  p: 4,
+  p: 3,
 };
 
 const AppLayout = () => {
   const [show, setShow] = useState<boolean>(false);
+  const { loading, setLoading } = useRequestState();
   const [showModal, setShowModal] = useState<boolean>(false);
   const branding: Branding = {
     logo: <QueryStatsIcon sx={{ height: 60, width: 35 }} />,
@@ -54,15 +53,9 @@ const AppLayout = () => {
     title: "Query App",
   };
 
-  const SidebarFooter = (_data: SidebarFooterProps) => {
-    return (
-      <Box p={2} mb="auto">
-        <Button color="info" onClick={() => setShowModal(true)}>
-          Show Metrics
-        </Button>
-      </Box>
-    );
-  };
+  useEffect(() => {
+    localStorage.setItem("currentState", "unoptimised");
+  }, []);
 
   const { data } = useProfilerResult();
 
@@ -105,28 +98,44 @@ const AppLayout = () => {
       }
     }
   }, [loadingCount]);
-  console.log(show);
 
   return (
     <Stack sx={{ maxWidth: "100%", minHeight: "100vh" }}>
       <ReactRouterAppProvider navigation={navigation}>
-        <DashboardLayout
-          slots={{
-            sidebarFooter: show ? SidebarFooter : undefined,
-          }}
-          disableCollapsibleSidebar
-          branding={branding}
-        >
-          <PageContainer>
-            <Outlet />
-            <ToastContainer />
-            <Modal open={showModal} onClose={() => setShowModal(false)}>
-              <Box sx={style}>
-                {data && <MiniProfilerTable profiler={data} />}
-              </Box>
-            </Modal>
-          </PageContainer>
-        </DashboardLayout>
+        {loading ? (
+          <Stack flexDirection="column" gap={2}>
+            <Skeleton width="100%" />
+            <Stack gap={2}>
+              <Skeleton height="100%" width={120} />
+              <Skeleton height="100%" width="100%" />
+            </Stack>
+          </Stack>
+        ) : (
+          <DashboardLayout
+            slots={{
+              sidebarFooter: () => (
+                <SidebarFooter
+                  mini
+                  setShowModal={setShowModal}
+                  show={show}
+                  setLoading={setLoading}
+                />
+              ),
+            }}
+            disableCollapsibleSidebar
+            branding={branding}
+          >
+            <PageContainer>
+              <Outlet />
+              <ToastContainer />
+              <Modal open={showModal} onClose={() => setShowModal(false)}>
+                <Box sx={style}>
+                  {data && <MiniProfilerTable profiler={data} />}
+                </Box>
+              </Modal>
+            </PageContainer>
+          </DashboardLayout>
+        )}
       </ReactRouterAppProvider>
     </Stack>
   );

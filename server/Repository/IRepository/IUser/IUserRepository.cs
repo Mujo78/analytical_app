@@ -6,7 +6,7 @@ namespace server.Repository.IRepository.IUser;
 
 public interface IUserRepository
 {
-    Task<List<User>> GetTopReputationUsersAsync();
+    Task<List<TopUserReputationDTO>> GetTopReputationUsersAsync();
     Task<UserAnalyticDTO?> GetUserAnalyticsAsync(int userId);
     Task CreateUserAsync(User user);
     Task UpdateUserAsync(User user);

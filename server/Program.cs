@@ -55,6 +55,9 @@ builder.Services.AddScoped<ICommentEFRepository, CommentEFRepository>();
 builder.Services.AddScoped<ICommentDapperRepository, CommentDapperRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 
+builder.Services.AddScoped<IDBRepository, DBRepository>();
+builder.Services.AddScoped<IDBService, DBService>();
+
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 builder.Services.AddMiniProfiler(options =>

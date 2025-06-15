@@ -8,5 +8,5 @@ public interface IPostService
     Task CreatePostAsync(CreateDTO post, int userId, bool useDapper = false);
     Task<int> DeletePostAsync(int postId, int userId);
     Task<int> DeletePostWithDapperAsync(int postId, int userId);
-    Task<PostDTO> GetPostById(int postId, bool useDapper);
+    Task<LastPostDTO> GetLastPostById(int postId, bool useDapper);
 }

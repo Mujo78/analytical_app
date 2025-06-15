@@ -7,6 +7,7 @@ using server.Repository;
 using server.Repository.IRepository;
 using server.Repository.IRepository.IUser;
 using server.Services.IServices;
+using EFCore.BulkExtensions;
 
 namespace server.Services;
 
@@ -71,7 +72,7 @@ public class UserService(IUserEFRepository userEFRepository, IUserDapperReposito
                 user.UpVotes += 5;
             }
 
-            await _context.SaveChangesAsync();
+            await _context.BulkUpdateAsync(users);
             await transaction.CommitAsync();
         }
         catch (Exception)
@@ -81,18 +82,16 @@ public class UserService(IUserEFRepository userEFRepository, IUserDapperReposito
         }
     }
 
-    public async Task<List<UserDTO>> GetTopReputationUsersAsync(bool useDapper = false)
+    public async Task<List<TopUserReputationDTO>> GetTopReputationUsersAsync(bool useDapper = false)
     {
-        List<User> users;
         if (useDapper)
         {
-            users = await _userDapperRepository.GetTopReputationUsersAsync();
+            return await _userDapperRepository.GetTopReputationUsersAsync();
         }
         else
         {
-            users = await _userEFRepository.GetTopReputationUsersAsync();
+            return await _userEFRepository.GetTopReputationUsersAsync();
         }
-        return _mapper.Map<List<UserDTO>>(users);
     }
 
     public async Task<UserDTO> GetUserByIdAsync(int userId, bool useDapper = false)
@@ -179,10 +178,8 @@ public class UserService(IUserEFRepository userEFRepository, IUserDapperReposito
         connection.Open();
         using var transaction = connection.BeginTransaction();
 
-
         try
         {
-
             var users = await _userDapperRepository.GetUsersForReputationBonusAsync(connection, transaction) ?? throw new Exception("No users found for reputation bonus distribution.");
             await _userDapperRepository.UpdateUsersReputationAsync(users, connection, transaction);
 

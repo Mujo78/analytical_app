@@ -3,17 +3,12 @@ import type { profileDataValidationSchema } from "../validations/userProfile";
 
 export interface TopUserReputation {
   id: number;
-  age: number;
-  aboutMe: string;
   displayName: string;
   downVotes: number;
-  emailHash: string;
-  location: string;
   reputation: number;
   upVotes: number;
   views: number;
   creationDate: Date;
-  lastAccessDate: Date;
 }
 
 export interface UserType {

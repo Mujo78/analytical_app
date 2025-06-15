@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { profileDataValidationSchema } from "../validations/userProfile";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { GetUserProfileInfo, UpdateUserProfile } from "../services/userService";
 import { Button, Stack, TextField, Typography } from "@mui/material";
 import type { UserType, UserProfileType } from "../types/user.type";
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const { orm, userId } = useParams();
   const [user, setUser] = useState<UserType>();
   const {
@@ -38,11 +39,16 @@ const UserProfile = () => {
   }, [userId, orm, reset]);
 
   const onSubmit = async (values: UserProfileType) => {
-    console.log(values);
     if (userId && isDirty) {
       const useDapper = orm === "dapper";
       const data = await UpdateUserProfile(userId, values, useDapper);
       reset(data);
+    }
+  };
+
+  const handleNavigateBack = () => {
+    if (orm) {
+      navigate(-1);
     }
   };
 
@@ -194,9 +200,13 @@ const UserProfile = () => {
             />
           )}
         </Stack>
-        <Button type="submit" variant="contained">
-          Submit
-        </Button>
+
+        <Stack flexDirection="row" justifyContent="space-between">
+          <Button onClick={handleNavigateBack}>Back</Button>
+          <Button type="submit" variant="contained">
+            Submit
+          </Button>
+        </Stack>
       </Stack>
     </Stack>
   );

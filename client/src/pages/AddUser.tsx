@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { profileDataValidationSchema } from "../validations/userProfile";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,6 +8,7 @@ import { Button, Stack, TextField, Typography } from "@mui/material";
 
 const AddUser = () => {
   const { orm } = useParams();
+  const navigate = useNavigate();
 
   const {
     control,
@@ -23,6 +24,13 @@ const AddUser = () => {
       const useDapper = orm === "dapper";
       await CreateUserProfile(values, useDapper);
       reset();
+    }
+  };
+
+  const handleNavigateBack = () => {
+    if (orm) {
+      const ormToUse = orm === "dapper" ? "dapper" : "entity-core";
+      navigate(`/${ormToUse}`);
     }
   };
 
@@ -130,9 +138,12 @@ const AddUser = () => {
           )}
         />
 
-        <Button type="submit" variant="contained">
-          Submit
-        </Button>
+        <Stack flexDirection="row" justifyContent="space-between">
+          <Button onClick={handleNavigateBack}>Back</Button>
+          <Button type="submit" variant="contained">
+            Submit
+          </Button>
+        </Stack>
       </Stack>
     </Stack>
   );

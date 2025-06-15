@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   createPostValidationSchema,
   postType,
@@ -21,6 +21,7 @@ import type { CreatePostType } from "../types/post.type";
 import { CreatePost } from "../services/postService";
 
 const AddPost = () => {
+  const navigate = useNavigate();
   const { orm, userId } = useParams();
 
   const {
@@ -47,7 +48,12 @@ const AddPost = () => {
     }));
   }, []);
 
-  console.log(selectPostTypes);
+  const handleNavigateBack = () => {
+    if (orm) {
+      navigate(-1);
+    }
+  };
+
   return (
     <Stack gap={6}>
       <Typography variant="h6">Add new Post for Selected User</Typography>
@@ -130,9 +136,12 @@ const AddPost = () => {
           )}
         />
 
-        <Button type="submit" variant="contained">
-          Submit
-        </Button>
+        <Stack flexDirection="row" justifyContent="space-between">
+          <Button onClick={handleNavigateBack}>Back</Button>
+          <Button type="submit" variant="contained">
+            Submit
+          </Button>
+        </Stack>
       </Stack>
     </Stack>
   );

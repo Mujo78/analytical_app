@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Table,
   TableBody,
@@ -17,8 +16,7 @@ import type {
   SQL,
 } from "../../types/miniprofiler.type";
 
-// Render SQL custom timings za ChildChild
-function renderSqlTimings(sqls: SQL[], level: number) {
+function renderSqlTimings(sqls: SQL[], level: number, hideDetails: boolean) {
   return sqls.map((sql) => (
     <TableRow key={sql.Id}>
       <TableCell sx={{ pl: `${level * 3}px` }}>
@@ -32,20 +30,25 @@ function renderSqlTimings(sqls: SQL[], level: number) {
       <TableCell>{sql.DurationMilliseconds.toFixed(2)}</TableCell>
       <TableCell>SQL Timing</TableCell>
       <TableCell>
-        <Typography
-          variant="caption"
-          component="pre"
-          sx={{ whiteSpace: "pre-wrap", m: 0 }}
-        >
-          {sql.CommandString}
-        </Typography>
+        {!hideDetails && (
+          <Typography
+            variant="caption"
+            component="pre"
+            sx={{ whiteSpace: "pre-wrap", m: 0 }}
+          >
+            {sql.CommandString}
+          </Typography>
+        )}
       </TableCell>
     </TableRow>
   ));
 }
 
-// Render Children ChildChild (deepest level)
-function renderChildChildren(children: ChildChild[], level: number) {
+function renderChildChildren(
+  children: ChildChild[],
+  level: number,
+  hideDetails: boolean
+) {
   return children.flatMap((child) => {
     const rows = [
       <TableRow key={child.Id}>
@@ -57,15 +60,20 @@ function renderChildChildren(children: ChildChild[], level: number) {
     ];
 
     if (child.CustomTimings?.sql) {
-      rows.push(...renderSqlTimings(child.CustomTimings.sql, level + 1));
+      rows.push(
+        ...renderSqlTimings(child.CustomTimings.sql, level + 1, hideDetails)
+      );
     }
 
     return rows;
   });
 }
 
-// Render RootChild (mid level)
-function renderRootChildren(children: RootChild[], level: number) {
+function renderRootChildren(
+  children: RootChild[],
+  level: number,
+  hideDetails: boolean
+) {
   return children.flatMap((child) => {
     const rows = [
       <TableRow key={child.Id}>
@@ -77,14 +85,13 @@ function renderRootChildren(children: RootChild[], level: number) {
     ];
 
     if (child.Children.length > 0) {
-      rows.push(...renderChildChildren(child.Children, level + 1));
+      rows.push(...renderChildChildren(child.Children, level + 1, hideDetails));
     }
 
     return rows;
   });
 }
 
-// Render RootCustomTimings (resource timings)
 function renderResourceTimings(resources: Resource[], level: number) {
   return resources.map((res) => (
     <TableRow key={res.Id}>
@@ -108,8 +115,8 @@ function renderResourceTimings(resources: Resource[], level: number) {
   ));
 }
 
-// Glavna komponenta
 export function MiniProfilerTable({ profiler }: { profiler: MiniProfiler }) {
+  const hideDetails = profiler.Name === "User/DistributeReputationBonus";
   const root = profiler.Root;
 
   return (
@@ -135,7 +142,7 @@ export function MiniProfilerTable({ profiler }: { profiler: MiniProfiler }) {
           </TableRow>
 
           {/* Root children */}
-          {renderRootChildren(root.Children, 1)}
+          {renderRootChildren(root.Children, 1, hideDetails)}
 
           {/* Root custom timings (resource) */}
           {root.HasCustomTimings &&

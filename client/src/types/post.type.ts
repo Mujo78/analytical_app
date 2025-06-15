@@ -1,5 +1,6 @@
 import type { InferType } from "yup";
 import type { createPostValidationSchema } from "../validations/createPost";
+import type { Comment } from "./comment.type";
 
 export interface Post {
   id: number;
@@ -22,6 +23,21 @@ export interface Post {
   tags: string;
   title: string;
   viewCount: number;
+}
+
+export interface LastPostDetailsType {
+  id: number;
+  body: string;
+  closedDate: Date;
+  creationDate: Date;
+  lastEditDate: Date;
+  postTypeId: number;
+  score: number;
+  tags: string;
+  title: string;
+  ownerUserId: number;
+  viewCount: number;
+  comments: Comment[];
 }
 
 export type CreatePostType = InferType<typeof createPostValidationSchema>;

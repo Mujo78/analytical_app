@@ -3,6 +3,8 @@ using Dapper;
 using server.Models;
 using server.Repository.IRepository.IPost;
 using System.Data;
+using server.DTO.Post;
+using server.DTO.Comment;
 
 namespace server.Repository;
 
@@ -78,22 +80,20 @@ public class PostDapperRepository(DapperContext dapperContext) : IPostDapperRepo
             "This is a draft, fourth comment."
         };
 
-            foreach (var text in comments)
+            var commentsToInsert = comments.Select(text => new
             {
-                await connection.ExecuteAsync(
-                    insertCommentSql,
-                    new
-                    {
-                        Text = text,
-                        CreationDate = DateTime.UtcNow,
-                        UserId = userId,
-                        Score = 0,
-                        PostId = postId
-                    },
-                    transaction
-                );
-            }
+                Text = text,
+                CreationDate = DateTime.UtcNow,
+                UserId = userId,
+                Score = 0,
+                PostId = postId
+            }).ToList();
 
+            await connection.ExecuteAsync(
+                insertCommentSql,
+                commentsToInsert,
+                transaction
+            );
             transaction.Commit();
         }
         catch
@@ -167,4 +167,60 @@ public class PostDapperRepository(DapperContext dapperContext) : IPostDapperRepo
 
         await connection.ExecuteAsync(sql, new { PostId = postId }, transaction);
     }
+
+    public async Task<LastPostDTO?> GetLastPostById(int postId)
+    {
+        var sql = @"
+       SELECT 
+            p.Id, p.Body, p.ClosedDate, p.CommentCount, p.CreationDate, 
+            p.LastEditDate, p.PostTypeId, p.Score, p.Tags, p.Title, p.ViewCount,
+            p.OwnerUserId,
+            
+            c.Id AS CommentId, c.Text, c.CreationDate AS CommentCreationDate, 
+            c.PostId, c.Score AS CommentScore, c.UserId, u.DisplayName AS UserDisplayName
+
+        FROM Posts p
+        LEFT JOIN (
+            SELECT *
+            FROM (
+                SELECT *, ROW_NUMBER() OVER (PARTITION BY PostId ORDER BY CreationDate DESC) AS rn
+                FROM Comments
+            ) ranked
+            WHERE rn <= 5
+        ) c ON c.PostId = p.Id
+        LEFT JOIN Users u ON u.Id = c.UserId
+
+        WHERE p.Id = @postId
+        ORDER BY c.CreationDate DESC;
+    ";
+
+
+        using var connection = _dapperContext.CreateConnection();
+        var postDictionary = new Dictionary<int, LastPostDTO>();
+
+        var result = await connection.QueryAsync<LastPostDTO, CommentDTO, LastPostDTO>(
+            sql,
+            (post, comment) =>
+            {
+                if (!postDictionary.TryGetValue(post.Id, out var currentPost))
+                {
+                    currentPost = post;
+                    currentPost.Comments = new List<CommentDTO>();
+                    postDictionary.Add(post.Id, currentPost);
+                }
+
+                if (comment != null && comment.CommentId != 0)
+                {
+                    currentPost.Comments.Add(comment);
+                }
+
+                return currentPost;
+            },
+            new { postId },
+            splitOn: "CommentId"
+        );
+
+        return result.FirstOrDefault();
+    }
+
 }

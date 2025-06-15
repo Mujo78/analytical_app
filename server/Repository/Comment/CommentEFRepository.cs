@@ -35,7 +35,7 @@ public class CommentEFRepository(EntityDBContext context) : ICommentEFRepository
 
         return [..comments.Select(c => new CommentDTO
         {
-            Id = c.Id,
+            CommentId = c.Id,
             Text = c.Text,
             CreationDate = c.CreationDate,
             UserId = c.UserId ?? 0,

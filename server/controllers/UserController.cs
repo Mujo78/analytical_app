@@ -38,7 +38,7 @@ namespace server.Controllers
 
         /// <summary>
         /// Gets the user analytics by user ID.
-        /// Entity Framework Core is used to query the database.
+        /// Entity Framework Core is used to query the database by default.
         /// Complex SELECT query to retrieve user analytics including posts, comments, and scores.
         /// </summary>
         [HttpGet("analytics/{id}")]
@@ -59,7 +59,7 @@ namespace server.Controllers
 
         /// <summary>
         /// Creates a new user.
-        /// Entity Framework Core is used to insert the user into the database.
+        /// Entity Framework Core is used to insert the user into the database by default.
         /// Simple INSERT query to add a new user.
         /// </summary>
         [HttpPost]
@@ -85,7 +85,7 @@ namespace server.Controllers
 
         /// <summary>
         /// Updates an existing user.
-        /// Entity Framework Core is used to update the user in the database.
+        /// Entity Framework Core is used to update the user in the database by default.
         /// Simple UPDATE query to modify user details.
         /// </summary>
         [HttpPut("{userId}")]
@@ -128,7 +128,7 @@ namespace server.Controllers
                 await userService.DistributeBonusReputationAsync();
             }
 
-            return Ok("Bonus reputation points distributed successfully using Dapper.");
+            return Ok("Bonus reputation points distributed successfully.");
         }
 
     }

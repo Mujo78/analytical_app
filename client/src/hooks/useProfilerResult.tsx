@@ -9,8 +9,6 @@ const useProfilerResult = () => {
   const { loading, setLoading } = useRequestState();
   const [data, setData] = useState<MiniProfiler>();
 
-  console.log("objec heret");
-
   useEffect(() => {
     async function FetchMetricsForRequest() {
       setLoading(true);

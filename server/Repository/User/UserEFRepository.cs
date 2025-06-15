@@ -18,7 +18,7 @@ public class UserEFRepository(EntityDBContext context) : IUserEFRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<User>> GetTopReputationUsersAsync()
+    public async Task<List<TopUserReputationDTO>> GetTopReputationUsersAsync()
     {
         return await _context.Users
                 .Where(u => u.Reputation > 0 &&
@@ -26,6 +26,16 @@ public class UserEFRepository(EntityDBContext context) : IUserEFRepository
                 .OrderByDescending(u =>
                         (double)u.Reputation / EF.Functions.DateDiffDay(u.CreationDate, u.LastAccessDate))
                 .Take(10)
+                .Select(u => new TopUserReputationDTO
+                {
+                    Id = u.Id,
+                    DisplayName = u.DisplayName,
+                    Reputation = u.Reputation,
+                    Views = u.Views,
+                    UpVotes = u.UpVotes,
+                    DownVotes = u.DownVotes,
+                    CreationDate = u.CreationDate
+                })
                 .ToListAsync();
     }
 

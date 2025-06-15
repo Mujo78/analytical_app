@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using server.Data;
+using server.DTO.Comment;
+using server.DTO.Post;
 using server.Models;
 using server.Repository.IRepository.IPost;
 
@@ -70,6 +72,44 @@ public class PostEFRepository(EntityDBContext context) : IPostEFRepository
     public async Task<Post?> GetPostByIdAsync(int postId)
     {
         return await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+    }
+
+    public async Task<LastPostDTO?> GetLastPostById(int postId)
+    {
+        var post = await _context.Posts
+            .Where(p => p.Id == postId)
+            .Select(p => new LastPostDTO
+            {
+                Id = p.Id,
+                OwnerUserId = p.OwnerUserId,
+                Body = p.Body,
+                ClosedDate = p.ClosedDate,
+                CommentCount = p.CommentCount,
+                CreationDate = p.CreationDate,
+                LastEditDate = p.LastEditDate,
+                PostTypeId = p.PostTypeId,
+                Score = p.Score,
+                Tags = p.Tags,
+                Title = p.Title,
+                ViewCount = p.ViewCount,
+
+                Comments = p.Comments
+                    .OrderByDescending(c => c.CreationDate)
+                    .Take(5)
+                    .Select(c => new CommentDTO
+                    {
+                        CommentId = c.Id,
+                        Text = c.Text,
+                        CreationDate = c.CreationDate,
+                        PostId = c.PostId,
+                        Score = c.Score ?? 0,
+                        UserId = c.UserId,
+                        UserDisplayName = c.User.DisplayName
+                    }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        return post;
     }
     public async Task DeleteAllCommentsByPostIdAsync(int postId)
     {

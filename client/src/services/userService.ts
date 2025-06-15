@@ -42,3 +42,17 @@ export async function CreateUserProfile(
 
   return res.data;
 }
+
+export async function DistributeReptationBouns(useDapper: boolean) {
+  const data = await apiClient.put(
+    "users/distribute-bonus",
+    {},
+    {
+      params: {
+        useDapper,
+      },
+    }
+  );
+
+  return data.status;
+}

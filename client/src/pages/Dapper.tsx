@@ -11,6 +11,9 @@ import {
 } from "@mui/material";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import useTopUsers from "../hooks/useTopUsers";
+import { toast } from "react-toastify";
+import { DistributeReptationBouns } from "../services/userService";
+import PlusOneIcon from "@mui/icons-material/PlusOne";
 
 const Dapper = () => {
   const navigate = useNavigate();
@@ -19,6 +22,21 @@ const Dapper = () => {
   const handleNavigate = (url: string, userId?: number) => {
     const key = userId ? `/${userId}` : "";
     navigate(`/dapper/${url}${key}`);
+  };
+
+  const handleDistributeBonus = async () => {
+    try {
+      const status = await DistributeReptationBouns(true);
+      if (status === 200) {
+        toast.success("Bonus reputation points distributed successfully");
+      }
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong, please try again later."
+      );
+    }
   };
 
   return (
@@ -44,10 +62,26 @@ const Dapper = () => {
               key={user.id}
               onClick={() => handleNavigate("user-analytics", user.id)}
             >
-              <Typography variant="subtitle2">{user.displayName}</Typography>
-              <Typography variant="body2">
-                Reputation: <strong>{user.reputation}</strong>
-              </Typography>
+              <Stack>
+                <Typography variant="h6">{user.displayName}</Typography>
+                <Typography mt="auto" variant="body2">
+                  Creation Date: {new Date(user.creationDate).toDateString()}
+                </Typography>
+              </Stack>
+              <Stack>
+                <Typography variant="body2">
+                  Reputation: <strong>{user.reputation}</strong>
+                </Typography>
+                <Typography variant="body2">
+                  Views: <strong>{user.views}</strong>
+                </Typography>
+                <Typography variant="body2">
+                  Up Votes: <strong>{user.upVotes}</strong>
+                </Typography>
+                <Typography variant="body2">
+                  Down Votes: <strong>{user.downVotes}</strong>
+                </Typography>
+              </Stack>
             </Card>
           ))}
 
@@ -67,6 +101,11 @@ const Dapper = () => {
             icon={<PersonAddAltIcon />}
             tooltipTitle="Add User"
             onClick={() => handleNavigate("add-user")}
+          />
+          <SpeedDialAction
+            icon={<PlusOneIcon />}
+            tooltipTitle="Distribute Bonus"
+            onClick={handleDistributeBonus}
           />
         </SpeedDial>
       </Box>

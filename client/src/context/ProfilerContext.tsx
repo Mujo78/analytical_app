@@ -23,7 +23,6 @@ function MiniProfilerProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    console.log("object");
     apiClient.interceptors.response.use((response) => {
       const miniProfilerHeader = response.headers["x-miniprofiler-ids"];
       const arrayMiniProfiler = JSON.parse(miniProfilerHeader);
@@ -33,7 +32,6 @@ function MiniProfilerProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  console.log(id);
   return (
     <MiniProfilerContext.Provider value={{ id, setId, clearId }}>
       {children}

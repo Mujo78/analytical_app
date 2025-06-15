@@ -10,20 +10,21 @@ namespace server.Controllers
     {
         private readonly ICommentService _commentService = commentService;
 
-        /// <summary>
-        /// Retrieves comments by postID - comments for posts - latest 10.
-        /// /// </summary>
-        [HttpGet("post/{postId}")]
-        public async Task<IActionResult> GetCommentsByPostIdAsync(int postId, [FromQuery] bool useDapper = false)
-        {
-            var comments = await _commentService.GetCommentsByPostIdAsync(postId, useDapper);
-            if (comments == null || comments.Count == 0)
-            {
-                return NotFound("No comments found for this post.");
-            }
-            return Ok(comments);
-        }
-
+        /*
+                /// <summary>
+                /// Retrieves comments by postID - comments for posts - latest 10.
+                /// /// </summary>
+                [HttpGet("post/{postId}")]
+                public async Task<IActionResult> GetCommentsByPostIdAsync(int postId, [FromQuery] bool useDapper = false)
+                {
+                    var comments = await _commentService.GetCommentsByPostIdAsync(postId, useDapper);
+                    if (comments == null || comments.Count == 0)
+                    {
+                        return NotFound("No comments found for this post.");
+                    }
+                    return Ok(comments);
+                }
+        */
         /// <summary>
         /// Deletes a comment by postId and commentId.
         /// </summary>

@@ -46,7 +46,7 @@ namespace server.Controllers
         {
             try
             {
-                PostDTO post = await postService.GetPostById(postId, useDapper);
+                LastPostDTO post = await postService.GetLastPostById(postId, useDapper);
                 return Ok(post);
             }
             catch (Exception ex)

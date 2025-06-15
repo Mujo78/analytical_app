@@ -163,8 +163,10 @@ const UserAnalytics = () => {
             </Button>
           </Stack>
         )}
+        <Button onClick={() => navigate(-1)} sx={{ marginRight: "auto" }}>
+          Back
+        </Button>
       </Card>
-
       <Box
         sx={{
           position: "absolute",

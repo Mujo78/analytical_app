@@ -85,29 +85,29 @@ public class PostService(IMapper mapper, IPostEFRepository postEFRepository, IPo
         }
     }
 
-    public async Task<PostDTO> GetPostById(int postId, bool useDapper)
+    public async Task<LastPostDTO> GetLastPostById(int postId, bool useDapper)
     {
         if (postId <= 0)
         {
             throw new ArgumentException("Post ID must be greateer than zero");
         }
 
-        Post? post;
+        LastPostDTO? post;
         if (useDapper)
         {
-            post = await postDapperRepository.GetPostByIdAsync(postId);
+            post = await postDapperRepository.GetLastPostById(postId);
         }
         else
         {
-            post = await postEFRepository.GetPostByIdAsync(postId);
+            post = await postEFRepository.GetLastPostById(postId);
         }
 
         if (post == null)
         {
             throw new Exception("Post not found!");
         }
-        return _mapper.Map<PostDTO>(post);
 
+        return post;
     }
     /// <summary>
     ///  Dapper Implementation
