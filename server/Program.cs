@@ -8,6 +8,7 @@ using server.Repository.IRepository.IPost;
 using server.Repository.IRepository.IUser;
 using server.Services;
 using server.Services.IServices;
+using StackExchange.Profiling.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:5173")
                 .AllowAnyHeader()
-                .AllowAnyMethod().AllowCredentials();
+                .AllowAnyMethod()
+                .AllowCredentials().WithExposedHeaders("x-miniprofiler-ids");
         });
 });
 
@@ -61,6 +63,7 @@ builder.Services.AddMiniProfiler(options =>
     options.TrackConnectionOpenClose = true;
     options.EnableServerTimingHeader = true;
     options.PopupShowTimeWithChildren = true;
+    options.MaxUnviewedProfiles = 0;
     options.ShouldProfile = _ => true;
 }).AddEntityFramework();
 
@@ -79,6 +82,29 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty;
     });
 }
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments(new PathString("/profiler"))) // Must match RouteBasePath
+    {
+        if (context.Request.Headers.TryGetValue("Origin", out var origin))
+        {
+            context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+            if (context.Request.Method == "OPTIONS")
+            {
+                context.Response.StatusCode = 200;
+                context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");
+                context.Response.Headers.Append("Access-Control-Allow-Methods", "OPTIONS, GET");
+                await context.Response.CompleteAsync();
+                return;
+            }
+        }
+    }
+
+    await next();
+});
+
+app.UseRouting();
 app.UseMiniProfiler();
 app.UseMiddleware<ResourceMetricsMiddleware>();
 app.UseHttpsRedirection();

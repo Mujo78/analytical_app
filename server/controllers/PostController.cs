@@ -15,7 +15,7 @@ namespace server.Controllers
         /// Creates a new post.
         /// Complex INSERT query to add a new post.
         /// </summary>
-        [HttpPost("/{userId}")]
+        [HttpPost("{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> CreatePost([FromBody] CreateDTO post, int userId, [FromQuery] bool useDapper = false)
@@ -33,6 +33,25 @@ namespace server.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Error creating post: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Get Post by Id.
+        /// </summary>
+        [HttpGet("{postId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> GetPost(int postId, [FromQuery] bool useDapper = false)
+        {
+            try
+            {
+                PostDTO post = await postService.GetPostById(postId, useDapper);
+                return Ok(post);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error fetching post: {ex.Message}");
             }
         }
 

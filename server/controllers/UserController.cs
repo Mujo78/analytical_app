@@ -25,11 +25,23 @@ namespace server.Controllers
         }
 
         /// <summary>
+        /// Get User.
+        /// </summary>
+        [HttpGet("{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> GetUserById(int userId, [FromQuery] bool useDapper = false)
+        {
+            var user = await userService.GetUserByIdAsync(userId, useDapper);
+            return Ok(user);
+        }
+
+        /// <summary>
         /// Gets the user analytics by user ID.
         /// Entity Framework Core is used to query the database.
         /// Complex SELECT query to retrieve user analytics including posts, comments, and scores.
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet("analytics/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> GetUserAnalytics(int id, [FromQuery] bool useDapper = false)

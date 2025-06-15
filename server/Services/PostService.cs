@@ -1,3 +1,4 @@
+using AutoMapper;
 using server.Data;
 using server.DTO.Post;
 using server.Models;
@@ -6,13 +7,13 @@ using server.Services.IServices;
 
 namespace server.Services;
 
-public class PostService(IPostEFRepository postEFRepository, IPostDapperRepository postDapperRepository, EntityDBContext dbContext, DapperContext dapperContext) : IPostService
+public class PostService(IMapper mapper, IPostEFRepository postEFRepository, IPostDapperRepository postDapperRepository, EntityDBContext dbContext, DapperContext dapperContext) : IPostService
 {
     private readonly IPostEFRepository postEFRepository = postEFRepository;
     private readonly IPostDapperRepository postDapperRepository = postDapperRepository;
     private readonly EntityDBContext _dbContext = dbContext;
     private readonly DapperContext dapperContext = dapperContext;
-
+    private readonly IMapper _mapper = mapper;
     public async Task CreatePostAsync(CreateDTO post, int userId, bool useDapper = false)
     {
         if (post == null)
@@ -84,6 +85,30 @@ public class PostService(IPostEFRepository postEFRepository, IPostDapperReposito
         }
     }
 
+    public async Task<PostDTO> GetPostById(int postId, bool useDapper)
+    {
+        if (postId <= 0)
+        {
+            throw new ArgumentException("Post ID must be greateer than zero");
+        }
+
+        Post? post;
+        if (useDapper)
+        {
+            post = await postDapperRepository.GetPostByIdAsync(postId);
+        }
+        else
+        {
+            post = await postEFRepository.GetPostByIdAsync(postId);
+        }
+
+        if (post == null)
+        {
+            throw new Exception("Post not found!");
+        }
+        return _mapper.Map<PostDTO>(post);
+
+    }
     /// <summary>
     ///  Dapper Implementation
     /// </summary>

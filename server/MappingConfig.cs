@@ -11,5 +11,6 @@ public class MappingConfig : Profile
     public MappingConfig()
     {
         CreateMap<User, UserDTO>().ReverseMap();
+        CreateMap<Post, PostDTO>().ReverseMap();
     }
 }

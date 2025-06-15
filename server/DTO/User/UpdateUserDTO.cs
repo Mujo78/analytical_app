@@ -6,7 +6,7 @@ public class UpdateUserDTO
 {
     [Required(ErrorMessage = "Display name is required.")]
     [MaxLength(40, ErrorMessage = "Display name cannot exceed 40 characters.")]
-    public required string DisplayName { get; set; }
+    public string DisplayName { get; set; }
     [MaxLength(40, ErrorMessage = "Email name cannot exceed 40 characters.")]
     public string Email { get; set; } = string.Empty;
     [MaxLength(100, ErrorMessage = "Location name cannot exceed 100 characters.")]
