@@ -20,7 +20,8 @@ public class DBRepository(DapperContext _dapperContext) : IDBRepository
             CREATE NONCLUSTERED INDEX IX_Posts_CreationDate ON Posts (CreationDate);
 
             IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Reputation_CreationDate')
-            CREATE NONCLUSTERED INDEX IX_Users_Reputation_CreationDate ON Users (Reputation, CreationDate);
+            CREATE NONCLUSTERED INDEX IX_Users_Reputation_CreationDate ON [dbo].[Users] ([Reputation])
+            INCLUDE ([CreationDate],[DisplayName],[DownVotes],[LastAccessDate],[UpVotes],[Views])
 
             IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Comments_PostId')
             CREATE NONCLUSTERED INDEX IX_Comments_PostId ON Comments (PostId);

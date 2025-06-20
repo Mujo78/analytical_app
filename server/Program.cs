@@ -8,7 +8,6 @@ using server.Repository.IRepository.IPost;
 using server.Repository.IRepository.IUser;
 using server.Services;
 using server.Services.IServices;
-using StackExchange.Profiling.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,7 +74,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -88,7 +86,7 @@ if (app.Environment.IsDevelopment())
 
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments(new PathString("/profiler"))) // Must match RouteBasePath
+    if (context.Request.Path.StartsWithSegments(new PathString("/profiler")))
     {
         if (context.Request.Headers.TryGetValue("Origin", out var origin))
         {
